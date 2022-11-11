@@ -1,3 +1,13 @@
+  //
+  // Settings added by Willem Hendriks
+  // (!) to be added to yaml or other settings config
+  //
+  //
+  // LABEL SETTINGS
+  const LABEL_MARGIN = 22; // margin between label-text and node, higher number -> more space
+  const LABEL_VISIBILITY_START_K = 1.5; // at this k, labels are still invisible
+  const LABEL_VISIBILITY_END_K = 5; // at this k, labels are fully visible
+
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/disjoint-force-directed-graph
@@ -27,6 +37,7 @@ function ForceGraph({
   invalidation // when this promise resolves, stop the simulation
 } = {}) {
   // Compute values.
+
   const N = d3.map(nodes, nodeId).map(intern);
   const C = d3.map(nodes, nodeConnectivity.bind(null, links));
   const LS = d3.map(links, linkSource).map(intern);
@@ -86,7 +97,6 @@ function ForceGraph({
     .range([2, 8]);
 
   const node = svg.append("g")
-    .attr("fill", nodeFill)
     .attr("stroke", nodeStroke)
     .attr("stroke-opacity", nodeStrokeOpacity)
     .attr("stroke-width", nodeStrokeWidth)
@@ -94,6 +104,16 @@ function ForceGraph({
     .data(nodes)
     .join("circle")
     .attr("r", d => nodeSizeScale(d.connectivity));
+
+  const labels = svg.append("g")
+    .selectAll("text")
+    .data(nodes)
+    .join('text')
+    .text(d => d.id)
+    .attr('font-family', 'Sans,Arial' )
+    .attr('font-size', '0.8em' )
+    .attr('fill', '#222' )
+    .attr('text-anchor', 'middle');
 
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
   if (T) node.append("title").text(({index: i}) => T[i]);
@@ -122,6 +142,10 @@ function ForceGraph({
     node
       .attr("cx", d => d.x)
       .attr("cy", d => d.y);
+
+    labels
+      .attr('x', d => d.x)
+      .attr('y', d => d.y);
   }
  
   // Zoom
@@ -146,7 +170,12 @@ function ForceGraph({
       .attr("y1", d => d.source.y * t.k)
       .attr("x2", d => d.target.x * t.k)
       .attr("y2", d => d.target.y * t.k)
-      .attr('transform', translate);;
+      .attr('transform', translate);
+    labels
+      .attr('transform', translate)
+      .attr('x', d => d.x * t.k )
+      .attr('y', d => d.y * t.k + LABEL_MARGIN )
+      .attr('opacity', opacity_activation(event.transform.k) );;
   }
 
   const zoom = d3.zoom()
@@ -158,4 +187,31 @@ function ForceGraph({
 
 
   return Object.assign(svg.node(), {scales: {color}});
+}
+
+
+function opacity_activation(zoom_level){
+  /* Summary: returns opacity value, depending on zoom level k
+   *
+   * opacity is a value betwen [0,1] where 0 is invisible
+   *
+   * Description: A linear opacity activation function.
+   * - for LABEL_VISIBILITY_START_K (and below) -> 0 (invisible)
+   * - for LABEL_VISIBILITY_END_K (and above) -> 1 (fully visible)
+   * - between: linear
+   *
+   *  ASCII are of activation function: ____/----
+   *
+   */
+
+  if (zoom_level <=  LABEL_VISIBILITY_START_K) {
+    return 0;
+  }
+  if (zoom_level >=  LABEL_VISIBILITY_END_K) {
+    return 1;
+  }
+
+  const linear_opacity = (zoom_level - LABEL_VISIBILITY_START_K) / (LABEL_VISIBILITY_END_K - LABEL_VISIBILITY_START_K);
+
+  return linear_opacity;
 }
