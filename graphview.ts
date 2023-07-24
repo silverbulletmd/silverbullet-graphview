@@ -1,14 +1,13 @@
-import { editor, space, index } from "$sb/silverbullet-syscall/mod.ts";
+import { editor, index, space } from "$sb/silverbullet-syscall/mod.ts";
 import { asset } from "$sb/plugos-syscall/mod.ts";
 import { StateProvider } from "stateprovider";
 import { ColorMap, ColorMapBuilder } from "colormap";
-import { SpaceGraph } from "model";
+import type { SpaceGraph } from "./model.ts";
 import { readGraphviewSettings } from "utils";
 import { GraphIgnore } from "graphignore";
 
 const stateProvider = new StateProvider("showGraphView");
 const colorMapBuilder = new ColorMapBuilder();
-
 
 // Toggle Graph View and sync state
 export async function toggleGraphView() {
@@ -106,8 +105,6 @@ async function script(graph: any) {
   `;
 }
 
-
-
 // Build a SpaceGraph object from the current space
 async function buildGraph(name: string): Promise<SpaceGraph> {
   const graphignore = new GraphIgnore();
@@ -116,42 +113,40 @@ async function buildGraph(name: string): Promise<SpaceGraph> {
   // Get all pages in space
   const pages = await space.listPages();
   const nodeNames = pages
-    .filter(graphignore.pagefilter)
+    .filter(graphignore.pagefilter.bind(graphignore))
     .map(({ name }) => {
       return name;
     });
 
   // NOTE: This may result to the same link showing multiple times
   //       if the same page has multiple references to another page.
-  const pageLinks = await index.queryPrefix(`pl:`);
+  const pageLinks = await index.queryPrefix(`l:`);
   const links = pageLinks
-    .filter(graphignore.linkfilter)
-    .map(({ key, page }) => {
-      const to = key.split(':')
+    .filter(graphignore.linkfilter.bind(graphignore))
+    .map(({ key, value: { name } }) => {
+      const to = key.split(":")
         .slice(1, -1)
-        .join(':'); // Key: pl:page:pos
+        .join(":"); // Key: pl:page:pos
 
       if (!nodeNames.includes(to)) {
         // Add nodes for non-existing pages which are linked to
         nodeNames.push(to);
       }
-      return { "source": page, "target": to };
+      return { "source": name, "target": to };
     });
 
   await colorMapBuilder.init();
-  const colors: ColorMap[] = colorMapBuilder.build()
+  const colors: ColorMap[] = colorMapBuilder.build();
   const default_color = await readGraphviewSettings("default_color");
 
   const nodes = nodeNames.map((name) => {
     // if page in colors → map color code to page name
     let color = default_color ? default_color : "000000";
     if (colors.find((c) => c.page === name)) {
-      color = colors.find((c) => c.page === name).color;
+      color = colors.find((c) => c.page === name)!.color;
     }
     return { "id": name, "color": color };
   });
 
   return { "nodes": nodes, "links": links };
 }
-
-
