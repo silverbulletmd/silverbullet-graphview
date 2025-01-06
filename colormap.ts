@@ -1,7 +1,7 @@
 import { Tag } from "model";
-import { index, space } from "$sb/silverbullet-syscall/mod.ts";
+import { space, system } from "@silverbulletmd/silverbullet/syscalls";
 import { readGraphviewSettings } from "utils";
-import { PageMeta } from "../silverbullet/common/types";
+import { PageMeta } from "@silverbulletmd/silverbullet/types";
 
 export class ColorMap {
   page: string;
@@ -31,9 +31,9 @@ export class ColorMapBuilder {
     this.colorMapTagSettings = this.colorMapSettings ? this.colorMapSettings["tag"] : [];
 
     // Get all tags
-    this.spacetags = await index.queryPrefix("tag:");
+    this.spacetags = await system.invokeFunction("index.queryObjects", "tag");
     this.taggedPages = [...new Set(this.spacetags.map((tag) => tag.page))];
-    this.individuallyTaggedPages = await index.queryPrefix("tag:node_color=");
+    this.individuallyTaggedPages = await system.invokeFunction("index.query", { prefix: ["tag:node_color="]});
 
     // Get all pages
     this.spacepages = await space.listPages();
@@ -57,11 +57,11 @@ export class ColorMapBuilder {
       if (this.colorMapTagSettings) {
         // check, if any of the tags is in colorMapSettings
         const pageTagsInColorMapSettings = pageTags.filter((tag) =>
-          this.colorMapTagSettings[tag.value] !== undefined,
+          this.colorMapTagSettings.hasOwnProperty(tag.name),
         );
         // if yes, use color from colorMapSettings
         if (pageTagsInColorMapSettings.length > 0) {
-          return { "page": page.name, "color": this.colorMapTagSettings[pageTagsInColorMapSettings[0].value] };
+          return { "page": page.name, "color": this.colorMapTagSettings[pageTagsInColorMapSettings[0].name] };
         }
       }
 

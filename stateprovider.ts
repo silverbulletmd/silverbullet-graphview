@@ -1,4 +1,4 @@
-import { clientStore } from "$sb/silverbullet-syscall/mod.ts";
+import { clientStore } from "@silverbulletmd/silverbullet/syscalls";
 
 export class StateProvider {
   graphViewKey: string;

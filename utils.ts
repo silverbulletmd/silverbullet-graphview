@@ -1,5 +1,5 @@
-import { readSetting } from "$sb/lib/settings_page.ts";
-import { editor } from "$sb/silverbullet-syscall/mod.ts";
+import { readSetting } from "https://deno.land/x/silverbullet@0.10.1/plug-api/lib/settings_page.ts";
+import { editor } from "@silverbulletmd/silverbullet/syscalls";
 
 
 export async function readGraphviewSettings(key: string) {

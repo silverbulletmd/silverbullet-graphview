@@ -1,5 +1,5 @@
-import { editor, index, space } from "$sb/silverbullet-syscall/mod.ts";
-import { asset } from "$sb/plugos-syscall/mod.ts";
+import { editor, space, system } from "@silverbulletmd/silverbullet/syscalls";
+import { asset } from "@silverbulletmd/silverbullet/syscalls";
 import { StateProvider } from "stateprovider";
 import { ColorMap, ColorMapBuilder } from "colormap";
 import type { SpaceGraph } from "./model.ts";
@@ -31,7 +31,15 @@ async function renderGraph(page: any) {
   // https://github.com/d3/d3-force
   const graph = await buildGraph(page);
   const graph_json = JSON.stringify(graph);
-  const css = await asset.readAsset("style.css");
+  const css = await asset.readAsset("graphview", "assets/style.css", "utf8");
+  const d3js = await asset.readAsset("graphview", "assets/d3.js", "utf8");
+  const d3forcejs = await asset.readAsset("graphview", "assets/d3-force.js", "utf8");
+  const d3forcegraph = await asset.readAsset(
+    "graphview",
+    "assets/force-graph.js",
+    "utf8",
+  );
+  const graphfns = await script(graph_json);
   if (await stateProvider.getGraphViewStatus()) {
     await editor.showPanel(
       "lhs",
@@ -41,29 +49,22 @@ async function renderGraph(page: any) {
           <style>${css}</style>
         </head>
         <body>
-          <div id="graph" >
-          </div>
+          <div id="graph"></div>
         </body>
       </html>`,
-      await script(graph_json), // Script (java script as string)
+      `
+       ${d3js}
+       ${d3forcejs}
+       ${d3forcegraph}
+       ${graphfns}
+      `, // Script (java script as string)
     );
   }
 }
 
 // Embed script
 async function script(graph: any) {
-  const d3js = await asset.readAsset("asset/d3.js", "utf8");
-  const d3forcejs = await asset.readAsset("asset/d3-force.js", "utf8");
-  const d3forcegraph = await asset.readAsset(
-    "asset/force-graph.js",
-    "utf8",
-  );
-
   return `
-    ${d3js}
-    ${d3forcejs}
-    ${d3forcegraph}
-    
     const graph = ${graph};
     console.log(graph);
     const graph_div = document.querySelector('#graph');
@@ -120,19 +121,15 @@ async function buildGraph(name: string): Promise<SpaceGraph> {
 
   // NOTE: This may result to the same link showing multiple times
   //       if the same page has multiple references to another page.
-  const pageLinks = await index.queryPrefix(`l:`);
+  const pageLinks = await system.invokeFunction("index.queryObjects", "link");
   const links = pageLinks
     .filter(graphignore.linkfilter.bind(graphignore))
-    .map(({ key, value: { name } }) => {
-      const to = key.split(":")
-        .slice(1, -1)
-        .join(":"); // Key: pl:page:pos
-
-      if (!nodeNames.includes(to)) {
+    .map((link) => {
+      if (!nodeNames.includes(link.toPage)) {
         // Add nodes for non-existing pages which are linked to
-        nodeNames.push(to);
+        nodeNames.push(link.toPage);
       }
-      return { "source": name, "target": to };
+      return { "source": link.page, "target": link.toPage };
     });
 
   await colorMapBuilder.init();

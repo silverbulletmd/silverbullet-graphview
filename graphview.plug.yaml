@@ -1,12 +1,8 @@
 name: graphview
-imports:
-  - https://get.silverbullet.md/global.plug.json
 version: 0.1
 assets:
-  - "asset/*"
-  - style.css
+  - "assets/**/*.*"
 functions:
-
   toggle:
     path: "./graphview.ts:toggleGraphView"
     command:
@@ -16,10 +12,9 @@ functions:
 
   updateGraphView:
     path: "./graphview.ts:updateGraphView"
-    env: client
     events:
-      - plug:load
       - editor:pageLoaded
+      - editor:pageReloaded
 
   navigateTo:
     path: "./utils.ts:navigateTo"
