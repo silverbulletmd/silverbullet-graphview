@@ -118,9 +118,9 @@ function ForceGraph({
     .data(nodes)
     .join('text')
     .text(d => {
-      if ([...d.id].length < LABEL_TRUNCATION_LENGTH) return d.id
+      const id = "" + d.id;
+      if (id.length < LABEL_TRUNCATION_LENGTH) return id
       else {
-        const id = d.id;
         const split = id.split('/')
         const last_element = split.pop()
         const result = split.map((e, i) => {
@@ -132,11 +132,11 @@ function ForceGraph({
     })
     .attr('font-family', 'Sans,Arial')
     .attr('font-size', d => `${labelSizeScale(d.connectivity)}em`)
-    .attr('fill', '#222')
+    .attr('fill', d => `#${d.color}`)
     .attr('text-anchor', 'middle')
     .attr('class', 'svgtext')
     .on('click', function (event, d) {
-      sendEvent('graphview:navigateTo', d.id);
+      syscall('event.dispatch','graphview:navigateTo', d.id);
     });
 
   if (G) node.attr("fill", ({ index: i }) => color(G[i]));

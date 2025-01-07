@@ -1,11 +1,20 @@
 {
   "imports": {
-    "$sb/": "https://deno.land/x/silverbullet@0.3.5/plug-api/",
+    "@silverbulletmd/silverbullet": "jsr:@silverbulletmd/silverbullet@0.10.1",
+    "@silverbulletmd/silverbullet/lib/frontmatter": "jsr:@silverbulletmd/silverbullet@0.10.1/lib/frontmatter",
+    "@silverbulletmd/silverbullet/lib/yaml_page": "jsr:@silverbulletmd/silverbullet@0.10.1/lib/yaml_page",
+    "@silverbulletmd/silverbullet/syscalls": "jsr:@silverbulletmd/silverbullet@0.10.1/syscalls",
+    "@silverbulletmd/silverbullet/lib/tree": "jsr:@silverbulletmd/silverbullet@0.10.1/lib/tree",
+    "@silverbulletmd/silverbullet/lib/parse_query": "jsr:@silverbulletmd/silverbullet@0.10.1/lib/parse_query",
+    "@silverbulletmd/silverbullet/lib/attribute": "jsr:@silverbulletmd/silverbullet@0.10.1/lib/attribute",
+    "@silverbulletmd/silverbullet/types": "jsr:@silverbulletmd/silverbullet@0.10.1/types",
+    "$common/": "https://deno.land/x/silverbullet@0.10.1/common/",
     "handlebars": "https://esm.sh/handlebars",
     "yaml": "https://deno.land/std@0.184.0/yaml/mod.ts",
     "stateprovider": "./stateprovider.ts",
     "colormap": "./colormap.ts",
     "utils": "./utils.ts",
+    "model": "./model.ts",
     "graphignore": "./graphignore.ts"
   }
 }

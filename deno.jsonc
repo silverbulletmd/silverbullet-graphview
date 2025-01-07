@@ -1,7 +1,8 @@
 {
   "importMap": "import_map.json",
   "tasks": {
-    "build": "silverbullet plug:compile --importmap import_map.json graphview.plug.yaml",
-    "watch": "silverbullet plug:compile -w --importmap import_map.json graphview.plug.yaml"
+    "build": "silverbullet plug:compile --info --importmap import_map.json graphview.plug.yaml",
+    "build-dbg": "silverbullet plug:compile --info --debug --importmap import_map.json graphview.plug.yaml",
+    "watch": "silverbullet plug:compile -w --info --importmap import_map.json graphview.plug.yaml"
   }
 }

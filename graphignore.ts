@@ -1,4 +1,4 @@
-import { editor, index, space } from "$sb/silverbullet-syscall/mod.ts";
+import { editor, space, system } from "@silverbulletmd/silverbullet/syscalls";
 
 export class GraphIgnore {
   ignoredPages: string[];
@@ -9,11 +9,12 @@ export class GraphIgnore {
 
   // Get all pages tagged with .graphignore
   async init(): Promise<void> {
-    this.ignoredPages = (await index.queryPrefix("tag:.graphignore"))
-      .map((tag) => tag.page);
+    this.ignoredPages = (await system.invokeFunction("index.queryObjects", "tag", {
+      filter: ["=", ["attr", "name"], ["string", "graphignore"]],
+    })).map((tag) => tag.page);
   }
 
-  // Check if a page is tagged with .graphignore
+  // Check if a page is tagged with graphignore
   isIgnoredPage(page: string): boolean {
     return this.ignoredPages.includes(page);
   }
@@ -25,10 +26,7 @@ export class GraphIgnore {
 
   // Filter function to remove links to and from pages tagged with .graphignore
   linkfilter(link: any) {
-    const topage = link.key.split(":")
-      .slice(1, -1)
-      .join(":");
     return !this.isIgnoredPage(link.page) &&
-      !this.isIgnoredPage(topage);
+      !this.isIgnoredPage(link.toPage);
   }
 }

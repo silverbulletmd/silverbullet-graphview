@@ -1,4 +1,4 @@
-import { clientStore } from "$sb/silverbullet-syscall/mod.ts";
+import { clientStore } from "@silverbulletmd/silverbullet/syscalls";
 
 export class StateProvider {
   graphViewKey: string;
@@ -15,5 +15,8 @@ export class StateProvider {
   }
   async toggleGraphViewStatus(): Promise<void> {
     await clientStore.set(this.graphViewKey, !await this.getGraphViewStatus());
+  }
+  async darkMode(): Promise<boolean> {
+    return !!(await clientStore.get("darkMode"));
   }
 }
