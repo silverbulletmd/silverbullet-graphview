@@ -26,7 +26,7 @@ supported by scroll and pinch gestures with the mouse(pad).
 Set tags on the pages to customize their appearance in the graph
 
 - `#node_color=ff0000` → Change node color to red
-- `#.graphignore` → Hide the page from the graph
+- `#graphignore` → Hide the page from the graph
 
 You can also use other custom tags to define node colors: Create a colormap with
 HEX-colorcodes in `SETTINGS.md`. In this example, a node of a page where the tag

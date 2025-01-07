@@ -22,8 +22,9 @@ export class ColorMapBuilder {
   taggedPages: string[];
   individuallyTaggedPages: any;
   default_color: any;
+  builtin_default_color: any;
 
-  async init(): Promise<void> {
+  async init(darkmode: bool): Promise<void> {
     // Read settings
     this.colorMapSettings = await readGraphviewSettings("colormap");
     console.log(this.colorMapSettings);
@@ -33,13 +34,18 @@ export class ColorMapBuilder {
     // Get all tags
     this.spacetags = await system.invokeFunction("index.queryObjects", "tag");
     this.taggedPages = [...new Set(this.spacetags.map((tag) => tag.page))];
-    this.individuallyTaggedPages = await system.invokeFunction("index.query", { prefix: ["tag:node_color="]});
+    this.individuallyTaggedPages = await system.invokeFunction("index.queryObjects", "tag", {
+      filter: ["=~", ["attr", "name"], ["string", "^nodecolor*"]],
+    });
 
     // Get all pages
     this.spacepages = await space.listPages();
 
     // Get default color
     this.default_color = await readGraphviewSettings("default_color");
+
+    // Set builtin default color
+    this.builtin_default_color = darkmode ? "bfbfbf" : "000000";
   }
 
   build(): ColorMap[] {
@@ -50,7 +56,7 @@ export class ColorMapBuilder {
 
       // If page has tag with "tag:node_color=" → use color from tag and continue
       if (this.individuallyTaggedPages.find((t) => t.page === page.name)) {
-        return { "page": page.name, "color": this.individuallyTaggedPages.find((t) => t.page === page.name).value.split("=")[1] };
+        return { "page": page.name, "color": this.individuallyTaggedPages.find((t) => t.page === page.name).name.split("=")[1] };
       }
 
       // If page has a tag from colorMapSettings ["tag"] →  map color code to page name and continue
@@ -76,7 +82,7 @@ export class ColorMapBuilder {
       }
 
       // Use default color
-      return { "page": page.name, "color": this.default_color ? this.default_color : "000000" };
+      return { "page": page.name, "color": this.default_color ? this.default_color : this.builtin_default_color };
     });
   }
 }

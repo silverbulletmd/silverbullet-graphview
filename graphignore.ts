@@ -9,11 +9,12 @@ export class GraphIgnore {
 
   // Get all pages tagged with .graphignore
   async init(): Promise<void> {
-    this.ignoredPages = (await system.invokeFunction("index.query", { prefix: ["tag:.graphignore"]}))
-      .map((tag) => tag.page);
+    this.ignoredPages = (await system.invokeFunction("index.queryObjects", "tag", {
+      filter: ["=", ["attr", "name"], ["string", "graphignore"]],
+    })).map((tag) => tag.page);
   }
 
-  // Check if a page is tagged with .graphignore
+  // Check if a page is tagged with graphignore
   isIgnoredPage(page: string): boolean {
     return this.ignoredPages.includes(page);
   }

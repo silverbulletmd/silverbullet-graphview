@@ -132,13 +132,15 @@ async function buildGraph(name: string): Promise<SpaceGraph> {
       return { "source": link.page, "target": link.toPage };
     });
 
-  await colorMapBuilder.init();
+  const darkmode = await stateProvider.darkMode();
+  await colorMapBuilder.init(darkmode);
   const colors: ColorMap[] = colorMapBuilder.build();
   const default_color = await readGraphviewSettings("default_color");
 
+  const builtin_default_color = darkmode ? "bfbfbf" : "000000";
   const nodes = nodeNames.map((name) => {
     // if page in colors → map color code to page name
-    let color = default_color ? default_color : "000000";
+    let color = default_color ? default_color : builtin_default_color;
     if (colors.find((c) => c.page === name)) {
       color = colors.find((c) => c.page === name)!.color;
     }

@@ -132,7 +132,7 @@ function ForceGraph({
     })
     .attr('font-family', 'Sans,Arial')
     .attr('font-size', d => `${labelSizeScale(d.connectivity)}em`)
-    .attr('fill', '#222')
+    .attr('fill', d => `#${d.color}`)
     .attr('text-anchor', 'middle')
     .attr('class', 'svgtext')
     .on('click', function (event, d) {
